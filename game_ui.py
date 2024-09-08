@@ -1,53 +1,111 @@
 import sys
 import json
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit)
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit, QStackedWidget)
+from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt
 from game_logic import load_words, get_word_and_description, create_hidden_word, update_hidden_word
 
-class HangmanGame(QMainWindow):
-    def __init__(self):
-        super().__init__()
+class MainMenu(QWidget):
+    """Главное меню игры."""
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.initUI()
+
+    def initUI(self):
+        layout = QVBoxLayout()
+
+        title = QLabel("Добро пожаловать в игру Виселица!")
+        title.setFont(QFont('Arial', 20))
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(title)
+
+        # Кнопка для начала новой игры
+        start_button = QPushButton("Начать новую игру", self)
+        start_button.setFont(QFont('Arial', 14))
+        start_button.clicked.connect(self.start_game)
+        layout.addWidget(start_button)
+
+        # Кнопка настроек
+        settings_button = QPushButton("Настройки", self)
+        settings_button.setFont(QFont('Arial', 14))
+        settings_button.clicked.connect(self.open_settings)
+        layout.addWidget(settings_button)
+
+        # Кнопка выхода
+        exit_button = QPushButton("Выход", self)
+        exit_button.setFont(QFont('Arial', 14))
+        exit_button.clicked.connect(self.close_app)
+        layout.addWidget(exit_button)
+
+        self.setLayout(layout)
+
+    def start_game(self):
+        self.parentWidget().setCurrentIndex(1)
+
+    def open_settings(self):
+        self.parentWidget().setCurrentIndex(2)
+
+    def close_app(self):
+        QApplication.quit()
+
+
+class HangmanGame(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self.load_hangman_stages('hangman_stages.json')  # Загрузить стадии виселицы до инициализации UI
         self.words = load_words('words.json')
         self.initUI()
         self.start_new_game()
 
     def initUI(self):
-        self.setWindowTitle("Игра Виселица")
-        self.setGeometry(100, 100, 600, 400)
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        self.layout = QVBoxLayout()
-        self.central_widget.setLayout(self.layout)
-        
+        layout = QVBoxLayout()
+
         # Метка для изображения виселицы
         self.hangman_text = QTextEdit(self)
         self.hangman_text.setReadOnly(True)
+        self.hangman_text.setFont(QFont('Courier', 18))
+        self.hangman_text.setStyleSheet("background-color: #f0f0f0; border: 2px solid #000;")
         self.hangman_text.setText(self.get_hangman_stage(0))  # По умолчанию показываем первый этап
-        self.layout.addWidget(self.hangman_text)
-        
+        layout.addWidget(self.hangman_text)
+
         # Метка для отображения скрытого слова
         self.word_label = QLabel(" ", self)
-        self.layout.addWidget(self.word_label)
-        
+        self.word_label.setFont(QFont('Arial', 20))
+        self.word_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.word_label)
+
+        # Метка для подсказки
+        self.description_label = QLabel("", self)
+        self.description_label.setFont(QFont('Arial', 16))
+        self.description_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.description_label.setStyleSheet("color: #555; padding: 10px;")
+        layout.addWidget(self.description_label)
+
         # Создание кнопок для ввода букв
         self.buttons_layout = QGridLayout()
-        self.layout.addLayout(self.buttons_layout)
+        layout.addLayout(self.buttons_layout)
         self.create_alphabet_buttons()
-        
+
         # Кнопка для новой игры
         self.new_game_button = QPushButton("Новая игра", self)
+        self.new_game_button.setFont(QFont('Arial', 14))
         self.new_game_button.clicked.connect(self.start_new_game)
-        self.layout.addWidget(self.new_game_button)
-        
-        # Кнопка выхода
-        self.exit_button = QPushButton("Выход", self)
-        self.exit_button.clicked.connect(self.close)
-        self.layout.addWidget(self.exit_button)
+        layout.addWidget(self.new_game_button)
+
+        # Кнопка выхода в главное меню
+        self.back_to_menu_button = QPushButton("Главное меню", self)
+        self.back_to_menu_button.setFont(QFont('Arial', 14))
+        self.back_to_menu_button.clicked.connect(self.back_to_menu)
+        layout.addWidget(self.back_to_menu_button)
+
+        self.setLayout(layout)
 
     def create_alphabet_buttons(self):
         alphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
         for index, letter in enumerate(alphabet):
             button = QPushButton(letter.upper(), self)
+            button.setFont(QFont('Arial', 14))
+            button.setFixedSize(40, 40)
             button.clicked.connect(self.handle_letter_click)
             self.buttons_layout.addWidget(button, index // 8, index % 8)
 
@@ -62,7 +120,6 @@ class HangmanGame(QMainWindow):
             return self.hangman_stages[stage]
         return "Ошибка загрузки изображения"
 
-
     def start_new_game(self):
         self.lives = len(self.hangman_stages) - 1  # Количество попыток равно числу стадий минус 1
         self.stage = 0
@@ -70,9 +127,9 @@ class HangmanGame(QMainWindow):
         self.hidden_word = create_hidden_word(self.word)
         self.update_ui()
 
-
     def update_ui(self):
         self.word_label.setText(" ".join(self.hidden_word))
+        self.description_label.setText(self.description)
         self.hangman_text.setText(self.get_hangman_stage(self.stage))
 
     def handle_letter_click(self):
@@ -93,10 +150,35 @@ class HangmanGame(QMainWindow):
             else:
                 self.update_ui()
 
+    def back_to_menu(self):
+        # Переключаемся на главное меню
+        self.parentWidget().setCurrentIndex(0)
+
+
+
+class MainApp(QStackedWidget):
+    """Основное приложение с переключением между окнами."""
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        # Добавляем главное меню
+        self.menu = MainMenu(self)
+        self.addWidget(self.menu)
+
+        # Добавляем игру
+        self.game = HangmanGame(self)
+        self.addWidget(self.game)
+
+        # Устанавливаем начальный вид - главное меню
+        self.setCurrentIndex(0)
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    game = HangmanGame()
-    game.show()
+    main_app = MainApp()
+    main_app.show()
     sys.exit(app.exec())
 
 
