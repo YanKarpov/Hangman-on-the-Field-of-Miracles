@@ -52,8 +52,8 @@ class MainMenu(QWidget):
 class HangmanGame(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.load_hangman_stages('hangman_stages.json')  # Загрузить стадии виселицы до инициализации UI
-        self.words = load_words('words.json')
+        self.load_hangman_stages('data/hangman_stages.json')  # Загрузить стадии виселицы до инициализации UI
+        self.words = load_words('data/words.json')
         self.initUI()
         self.start_new_game()
 
