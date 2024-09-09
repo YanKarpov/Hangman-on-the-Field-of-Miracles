@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (QLabel, QPushButton, QVBoxLayout, QWidget, QGridLay
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import Qt
 from src.game_logic import load_words, get_word_and_description, create_hidden_word, update_hidden_word
-from src.data_loader import load_json_data
+from src.data_loader import load_json_data, load_stylesheet
 
 
 class MainMenu(QWidget):
@@ -215,6 +215,11 @@ class MainApp(QStackedWidget):
         self.initUI()
 
     def initUI(self):
+        # Подключаем стили
+        stylesheet = load_stylesheet("src/styles.css")
+        if stylesheet:
+            self.setStyleSheet(stylesheet)
+
         # Добавляем главное меню
         self.menu = MainMenu(self)
         self.addWidget(self.menu)
@@ -229,6 +234,7 @@ class MainApp(QStackedWidget):
 
         # Отображаем главное меню при запуске
         self.setCurrentIndex(0)
+
 
 
 
