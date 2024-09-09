@@ -1,9 +1,9 @@
-import sys
-import json
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit, QStackedWidget)
+from PyQt6.QtWidgets import (QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit, QStackedWidget, QApplication)
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import Qt
-from game_logic import load_words, get_word_and_description, create_hidden_word, update_hidden_word
+from src.game_logic import load_words, get_word_and_description, create_hidden_word, update_hidden_word
+from src.data_loader import load_json_data
+
 
 class MainMenu(QWidget):
     """Главное меню игры."""
@@ -111,8 +111,7 @@ class HangmanGame(QWidget):
 
     def load_hangman_stages(self, file_path):
         """Загрузка стадий виселицы из JSON-файла."""
-        with open(file_path, 'r', encoding='utf-8') as file:
-            data = json.load(file)
+        data = load_json_data(file_path)
         self.hangman_stages = data['stages']
 
     def get_hangman_stage(self, stage):
@@ -155,7 +154,6 @@ class HangmanGame(QWidget):
         self.parentWidget().setCurrentIndex(0)
 
 
-
 class MainApp(QStackedWidget):
     """Основное приложение с переключением между окнами."""
     def __init__(self):
@@ -174,12 +172,6 @@ class MainApp(QStackedWidget):
         # Устанавливаем начальный вид - главное меню
         self.setCurrentIndex(0)
 
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    main_app = MainApp()
-    main_app.show()
-    sys.exit(app.exec())
 
 
 
