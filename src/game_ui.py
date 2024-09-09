@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import (QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit, QStackedWidget, QApplication)
+from PyQt6.QtWidgets import (QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit, QStackedWidget, QSlider, QCheckBox, QApplication)
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import Qt
 from src.game_logic import load_words, get_word_and_description, create_hidden_word, update_hidden_word
@@ -154,6 +154,60 @@ class HangmanGame(QWidget):
         self.parentWidget().setCurrentIndex(0)
 
 
+class SettingsMenu(QWidget):
+    """Меню настроек игры."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.initUI()
+
+    def initUI(self):
+        layout = QVBoxLayout()
+
+        # Заголовок
+        title = QLabel("Настройки игры")
+        title.setFont(QFont('Arial', 18))
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(title)
+
+        # Слайдер для выбора уровня сложности (количество жизней)
+        self.difficulty_slider = QSlider(Qt.Orientation.Horizontal)
+        self.difficulty_slider.setMinimum(1)
+        self.difficulty_slider.setMaximum(10)
+        self.difficulty_slider.setValue(6)  # Значение по умолчанию
+        layout.addWidget(QLabel("Уровень сложности (попытки):"))
+        layout.addWidget(self.difficulty_slider)
+
+        # Чекбокс для включения/выключения музыки
+        self.music_checkbox = QCheckBox("Включить музыку", self)
+        self.music_checkbox.setChecked(True)  # По умолчанию музыка включена
+        layout.addWidget(self.music_checkbox)
+
+        # Кнопка сохранения настроек
+        save_button = QPushButton("Сохранить настройки", self)
+        save_button.setFont(QFont('Arial', 14))
+        save_button.clicked.connect(self.save_settings)
+        layout.addWidget(save_button)
+
+        # Кнопка для возврата в меню
+        back_button = QPushButton("Назад в меню", self)
+        back_button.setFont(QFont('Arial', 14))
+        back_button.clicked.connect(self.back_to_menu)
+        layout.addWidget(back_button)
+
+        self.setLayout(layout)
+
+    def save_settings(self):
+        """Сохраняем выбранные настройки."""
+        difficulty = self.difficulty_slider.value()
+        music_enabled = self.music_checkbox.isChecked()
+        # Здесь можно сохранить настройки в файл или применить их к игре
+        print(f"Сложность: {difficulty}, Музыка: {'включена' if music_enabled else 'выключена'}")
+
+    def back_to_menu(self):
+        # Возвращаемся в главное меню
+        self.parentWidget().setCurrentIndex(0)
+
+
 class MainApp(QStackedWidget):
     """Основное приложение с переключением между окнами."""
     def __init__(self):
@@ -169,8 +223,14 @@ class MainApp(QStackedWidget):
         self.game = HangmanGame(self)
         self.addWidget(self.game)
 
-        # Устанавливаем начальный вид - главное меню
+        # Добавляем настройки
+        self.settings = SettingsMenu(self)
+        self.addWidget(self.settings)
+
+        # Отображаем главное меню при запуске
         self.setCurrentIndex(0)
+
+
 
 
 
