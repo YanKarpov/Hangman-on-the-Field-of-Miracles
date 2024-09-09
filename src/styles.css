@@ -1,0 +1,46 @@
+/* styles.css */
+QLabel {
+    font-family: Arial;
+    font-size: 16px;
+    color: #333;
+}
+
+QPushButton {
+    font-family: Arial;
+    font-size: 14px;
+    background-color: #226a91;
+    color: white;
+    border: none;
+    padding: 10px;
+    text-align: center;
+    border-radius: 4px;
+}
+
+QPushButton:hover {
+    background-color: #1a96dd;
+}
+
+QTextEdit {
+    background-color: #f0f0f0;
+    border: 2px solid #000;
+    font-family: Courier;
+    font-size: 18px;
+}
+
+QSlider::groove:horizontal {
+    background-color: #ddd;
+    height: 10px;
+}
+
+QSlider::handle:horizontal {
+    background-color: #4CAF50;
+    width: 15px;
+    height: 15px;
+    border-radius: 7px;
+}
+
+QCheckBox {
+    font-family: Arial;
+    font-size: 14px;
+    color: #333;
+}
