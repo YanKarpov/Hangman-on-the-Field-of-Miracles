@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import (QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit, QStackedWidget, QApplication)
+from PyQt6.QtWidgets import (QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit, QStackedWidget)
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import Qt
 from src.game_logic import load_words, get_word_and_description, create_hidden_word, update_hidden_word
@@ -9,10 +9,10 @@ from src.settings_menu import SettingsMenu
 ALPHABET = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
 
 class HangmanGame(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, words=None, hangman_stages=None):
         super().__init__(parent)
-        self.load_hangman_stages('data/hangman_stages.json')
-        self.words = load_words('data/words.json')
+        self.words = words
+        self.hangman_stages = hangman_stages
         self.initUI()
         self.start_new_game()
 
@@ -61,10 +61,6 @@ class HangmanGame(QWidget):
             button.clicked.connect(self.handle_letter_click)
             self.buttons_layout.addWidget(button, index // 8, index % 8)
 
-    def load_hangman_stages(self, file_path):
-        data = load_json_data(file_path)
-        self.hangman_stages = data.get('stages', [])
-
     def get_hangman_stage(self, stage):
         return self.hangman_stages[stage] if 0 <= stage < len(self.hangman_stages) else "Ошибка загрузки изображения"
 
@@ -98,6 +94,7 @@ class HangmanGame(QWidget):
             else:
                 self.update_ui()
 
+
     def back_to_menu(self):
         self.parentWidget().setCurrentIndex(0)
 
@@ -105,6 +102,8 @@ class HangmanGame(QWidget):
 class MainApp(QStackedWidget):
     def __init__(self):
         super().__init__()
+        self.words = load_words('data/words.json')  
+        self.hangman_stages = load_json_data('data/hangman_stages.json')['stages']  
         self.initUI()
 
     def initUI(self):
@@ -115,7 +114,7 @@ class MainApp(QStackedWidget):
         self.menu = MainMenu(self)
         self.addWidget(self.menu)
 
-        self.game = HangmanGame(self)
+        self.game = HangmanGame(self, words=self.words, hangman_stages=self.hangman_stages)
         self.addWidget(self.game)
 
         self.settings = SettingsMenu(self)
