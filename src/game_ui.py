@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import (QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit, QStackedWidget)
+from PyQt6.QtWidgets import (QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit, QStackedWidget, QMessageBox)
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import Qt
 from src.game_logic import load_words, get_word_and_description, create_hidden_word, update_hidden_word
@@ -77,22 +77,35 @@ class HangmanGame(QWidget):
         self.hangman_text.setText(self.get_hangman_stage(self.stage))
 
     def handle_letter_click(self):
-        sender = self.sender()
-        letter = sender.text().lower()
-        if letter in self.word:
-            self.hidden_word = update_hidden_word(self.word, self.hidden_word, letter)
-            self.update_ui()
-            if ''.join(self.hidden_word) == self.word:
-                self.word_label.setText("Поздравляю, ты выиграл!")
-        else:
-            self.lives -= 1
-            self.stage += 1
-            if self.lives == 0:
-                self.stage = len(self.hangman_stages) - 1
+            sender = self.sender()
+            letter = sender.text().lower()
+            if letter in self.word:
+                self.hidden_word = update_hidden_word(self.word, self.hidden_word, letter)
                 self.update_ui()
-                self.word_label.setText(f"Игра окончена! Слово было: {self.word}")
+                if ''.join(self.hidden_word) == self.word:
+                    self.show_message("Поздравляю, ты выиграл!", QMessageBox.Icon.Information)
             else:
-                self.update_ui()
+                self.lives -= 1
+                self.stage += 1
+                if self.lives == 0:
+                    self.stage = len(self.hangman_stages) - 1
+                    self.update_ui()
+                    self.show_message(f"Игра окончена! Слово было: {self.word}", QMessageBox.Icon.Critical)
+                else:
+                    self.update_ui()
+
+    def show_message(self, text, icon):
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(icon)
+        msg_box.setText(text)
+        msg_box.setWindowTitle("Результат")
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+        msg_box.buttonClicked.connect(self.handle_message_button_click)
+        msg_box.exec()
+
+    def handle_message_button_click(self, button):
+        if self.sender().text() == "OK":
+            self.start_new_game()
 
 
     def back_to_menu(self):
