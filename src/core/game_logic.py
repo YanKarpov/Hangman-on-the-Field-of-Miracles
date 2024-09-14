@@ -1,12 +1,3 @@
-import random
-import json
-
-def load_words(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        words = json.load(file)
-    random.shuffle(words)
-    return words
-
 def get_word_and_description(words):
     if not words:
         return None, None

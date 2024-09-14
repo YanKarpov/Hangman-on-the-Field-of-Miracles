@@ -96,7 +96,7 @@ class SettingsMenu(QWidget):
 
     def update_music(self):
         if self.music_playing:
-            pygame.mixer.music.load("data/background_music.mp3")
+            pygame.mixer.music.load("assets/data/background_music.mp3")
             pygame.mixer.music.play(-1)  
         else:
             pygame.mixer.music.stop()

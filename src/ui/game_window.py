@@ -1,10 +1,7 @@
-from PyQt6.QtWidgets import (QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit, QStackedWidget, QMessageBox)
+from PyQt6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget, QGridLayout, QTextEdit, QMessageBox
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import Qt
-from src.game_logic import load_words, get_word_and_description, create_hidden_word, update_hidden_word
-from src.data_loader import load_json_data, load_stylesheet
-from src.main_menu import MainMenu  
-from src.settings_menu import SettingsMenu  
+from src.core.game_logic import get_word_and_description, create_hidden_word, update_hidden_word
 
 ALPHABET = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
 
@@ -23,7 +20,6 @@ class HangmanGame(QWidget):
         self.hangman_text.setReadOnly(True)
         self.hangman_text.setFont(QFont('Courier', 18))
         self.hangman_text.setStyleSheet("background-color: #f0f0f0; border: 2px solid #000;")
-        self.hangman_text.setText(self.get_hangman_stage(0))
         layout.addWidget(self.hangman_text)
 
         self.word_label = QLabel(" ", self)
@@ -34,7 +30,6 @@ class HangmanGame(QWidget):
         self.description_label = QLabel("", self)
         self.description_label.setFont(QFont('Arial', 16))
         self.description_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.description_label.setStyleSheet("color: #555; padding: 10px;")
         layout.addWidget(self.description_label)
 
         self.buttons_layout = QGridLayout()
@@ -77,22 +72,22 @@ class HangmanGame(QWidget):
         self.hangman_text.setText(self.get_hangman_stage(self.stage))
 
     def handle_letter_click(self):
-            sender = self.sender()
-            letter = sender.text().lower()
-            if letter in self.word:
-                self.hidden_word = update_hidden_word(self.word, self.hidden_word, letter)
+        sender = self.sender()
+        letter = sender.text().lower()
+        if letter in self.word:
+            self.hidden_word = update_hidden_word(self.word, self.hidden_word, letter)
+            self.update_ui()
+            if ''.join(self.hidden_word) == self.word:
+                self.show_message("Поздравляю, ты выиграл!", QMessageBox.Icon.Information)
+        else:
+            self.lives -= 1
+            self.stage += 1
+            if self.lives == 0:
+                self.stage = len(self.hangman_stages) - 1
                 self.update_ui()
-                if ''.join(self.hidden_word) == self.word:
-                    self.show_message("Поздравляю, ты выиграл!", QMessageBox.Icon.Information)
+                self.show_message(f"Игра окончена! Слово было: {self.word}", QMessageBox.Icon.Critical)
             else:
-                self.lives -= 1
-                self.stage += 1
-                if self.lives == 0:
-                    self.stage = len(self.hangman_stages) - 1
-                    self.update_ui()
-                    self.show_message(f"Игра окончена! Слово было: {self.word}", QMessageBox.Icon.Critical)
-                else:
-                    self.update_ui()
+                self.update_ui()
 
     def show_message(self, text, icon):
         msg_box = QMessageBox(self)
@@ -107,30 +102,6 @@ class HangmanGame(QWidget):
         if self.sender().text() == "OK":
             self.start_new_game()
 
-
     def back_to_menu(self):
         self.parentWidget().setCurrentIndex(0)
 
-
-class MainApp(QStackedWidget):
-    def __init__(self):
-        super().__init__()
-        self.words = load_words('data/words.json')  
-        self.hangman_stages = load_json_data('data/hangman_stages.json')['stages']  
-        self.initUI()
-
-    def initUI(self):
-        stylesheet = load_stylesheet("src/styles.css")
-        if stylesheet:
-            self.setStyleSheet(stylesheet)
-
-        self.menu = MainMenu(self)
-        self.addWidget(self.menu)
-
-        self.game = HangmanGame(self, words=self.words, hangman_stages=self.hangman_stages)
-        self.addWidget(self.game)
-
-        self.settings = SettingsMenu(self)
-        self.addWidget(self.settings)
-
-        self.setCurrentIndex(0)
