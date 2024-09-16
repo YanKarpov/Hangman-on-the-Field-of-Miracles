@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QApplication, QStackedWidget
+from PyQt6.QtGui import QIcon
 from src.core.data_loader import load_words, load_json_data, load_stylesheet
 from src.ui.main_menu import MainMenu
 from src.ui.game_window import HangmanGame
@@ -12,6 +13,10 @@ class MainApp(QStackedWidget):
         self.initUI()
 
     def initUI(self):
+        self.setWindowTitle("Hangman Game")
+        self.setWindowIcon(QIcon('assets/images/catch.png'))  
+
+
         stylesheet = load_stylesheet("src/styles.css")
         if stylesheet:
             self.setStyleSheet(stylesheet)
