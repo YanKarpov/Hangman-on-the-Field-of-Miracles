@@ -1,17 +1,12 @@
 from PyQt6.QtWidgets import (QLabel, QPushButton, QVBoxLayout, QWidget, QCheckBox, QComboBox, QRadioButton, QButtonGroup)
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import Qt
-import pygame 
 
 class SettingsMenu(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.initUI()
         self.saved_geometry = None
-
-        pygame.mixer.init()
-        self.music_playing = True
-        self.update_music()
 
     def initUI(self):
         layout = QVBoxLayout()
@@ -56,52 +51,12 @@ class SettingsMenu(QWidget):
         self.music_checkbox.setChecked(True)  
         layout.addWidget(self.music_checkbox)
 
-        save_button = QPushButton("Сохранить настройки", self)
-        save_button.setFont(QFont('Arial', 14))
-        save_button.clicked.connect(self.save_settings)
-        layout.addWidget(save_button)
+        self.save_button = QPushButton("Сохранить настройки", self)
+        self.save_button.setFont(QFont('Arial', 14))
+        layout.addWidget(self.save_button)
 
-        back_button = QPushButton("Назад в меню", self)
-        back_button.setFont(QFont('Arial', 14))
-        back_button.clicked.connect(self.back_to_menu)
-        layout.addWidget(back_button)
+        self.back_button = QPushButton("Назад в меню", self)
+        self.back_button.setFont(QFont('Arial', 14))
+        layout.addWidget(self.back_button)
 
         self.setLayout(layout)
-
-    def save_settings(self):
-        difficulty = "Easy" if self.easy_checkbox.isChecked() else \
-                     "Medium" if self.medium_checkbox.isChecked() else \
-                     "Hard" if self.hard_checkbox.isChecked() else \
-                     "None"
-        resolution = self.resolution_combo.currentText()
-        display_mode = "Fullscreen" if self.fullscreen_radio.isChecked() else "Windowed"
-        music_enabled = self.music_checkbox.isChecked()
-
-        print(f"Уровень сложности: {difficulty}, Разрешение окна: {resolution}, Режим отображения: {display_mode}, Музыка: {'Включена' if music_enabled else 'Выключена'}")
-
-        if display_mode == "Fullscreen":
-            self.saved_geometry = self.parentWidget().geometry()  
-            self.parentWidget().showFullScreen()
-        else:
-            if self.saved_geometry:
-                self.parentWidget().setGeometry(self.saved_geometry) 
-            else:
-                width, height = map(int, resolution.split('x'))
-                self.parentWidget().resize(width, height)
-            self.parentWidget().showNormal()
-
-        
-        self.music_playing = music_enabled
-        self.update_music()
-
-    def update_music(self):
-        if self.music_playing:
-            pygame.mixer.music.load("assets/data/background_music.mp3")
-            pygame.mixer.music.play(-1)  
-        else:
-            pygame.mixer.music.stop()
-
-    def back_to_menu(self):
-        self.parentWidget().setCurrentIndex(0)
-
-

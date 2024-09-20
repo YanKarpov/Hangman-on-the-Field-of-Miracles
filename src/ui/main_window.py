@@ -3,6 +3,7 @@ from src.core.data_loader import load_words, load_json_data, load_stylesheet
 from src.ui.main_menu import MainMenu
 from src.ui.game_window import HangmanGame
 from src.ui.settings_window import SettingsMenu
+from src.controllers.settings_controller import SettingsController
 
 class MainApp(QStackedWidget):
     def __init__(self):
@@ -22,8 +23,8 @@ class MainApp(QStackedWidget):
         self.game = HangmanGame(self, words=self.words, hangman_stages=self.hangman_stages)
         self.addWidget(self.game)
 
-        self.settings = SettingsMenu(self)
-        self.addWidget(self.settings)
+        self.settings_controller = SettingsController(self)
+        self.addWidget(self.settings_controller.settings)
 
         self.setCurrentIndex(0)
 
